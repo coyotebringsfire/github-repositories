@@ -1,0 +1,25 @@
+{
+  "name": "github-repositories",
+  "version": "0.0.1",
+  "description": "parse the results of /repositories github API",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coyotebringsfire/github-repositories.git"
+  },
+  "keywords": [
+    "github"
+  ],
+  "author": "coyotebringsfire",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coyotebringsfire/github-repositories/issues"
+  },
+  "homepage": "https://github.com/coyotebringsfire/github-repositories"
+}
