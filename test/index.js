@@ -20,17 +20,39 @@ describe("github-repositories", function libSuite() {
 		});
 		describe("#stop", function stopMethod() {
 			it("should stop requesting repositories", function doIt(done) {
-				should.fail();
+				var gr = new GR();
+				gr.start();
+				setTimeout( function onTimeout() {
+					var numRepos = gr.repos.length;
+					gr.stop();
+					gr.stopped.should.be.ok;
+					numRepos.should.equal( gr.repos.length);
+					done();
+				}, 500);
+			});
+			it("should set stopped variable to true even if the scraper never started", function doIt(done) {
+				var gr = new GR();
+				gr.stop();
+				gr.stopped.should.be.ok;
+				done();
 			});
 		});
 		describe("#start", function startMethod() {
 			it("should start requesting repositories", function doIt(done) {
-				should.fail();
+				var gr = new GR();
+				gr.start();
+				gr.on('repo', function onRepo(evt) {
+					gr.repos.length.should.be.greaterThan(0);
+					if( !gr.stopped ) {
+						gr.stop();
+						done();
+					}
+				});
 			});
-		});
-		it("should emit a repo event for each repo returned", function doIt(done) {
-			var gr = new GR();
-			gr.on('repo', function(evt) {
+			it("should set stopped variable to false", function doIt(done) {
+				var gr = new GR();
+				gr.start();
+				gr.stopped.should.not.be.ok;
 				gr.stop();
 				done();
 			});
