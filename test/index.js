@@ -12,7 +12,11 @@ describe("github-repositories", function libSuite() {
 			done();
 		});
 		it("should use the custom url passed in the options object passed as the first argument", function doIt(done) {
-			should.fail();
+			var gr = new GR({
+				url: "TESTURL"
+			});
+			gr.url.should.equal("TESTURL");
+			done();
 		});
 		describe("#stop", function stopMethod() {
 			it("should stop requesting repositories", function doIt(done) {
