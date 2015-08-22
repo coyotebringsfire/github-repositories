@@ -1,6 +1,6 @@
 var should 	= require('should'),
 	request = require('request'),
-	nock 	= require('nock');
+	util 	= require('util');
 
 describe("github-repositories", function libSuite() {
 	var GR 	= require('../');
@@ -8,20 +8,21 @@ describe("github-repositories", function libSuite() {
 		GR.should.be.type('function');
 	});
 	describe("GR class", function grSuite() {
-		it.skip("should make authenticated requests if an oauth token is passed in the options argument", function doit(done) {
-			should.fail();
+		it("should make authenticated requests if an oauth token is passed in the options argument", function doit(done) {
+			//should.fail();
+			var nock = require('nock');
 			var gr = new GR({
-				token: OAUTH_TOKEN
+				token: "OAUTH_TOKEN"
 			});
-			nock(gr.url)
-				.get("/repositories")
-				.reply(201, '', {
-					'x-ratelimit-reset': Date.now()+1000,
+			nock("https://api.github.com")
+				.get("/repositories?access_token=OAUTH_TOKEN")
+				.reply(200, JSON.stringify([1,2,3]), {
+					'x-ratelimit-reset': Date.now()+10000,
 					'x-ratelimit-remaining': 0
 				});
 			gr.start();
 			setTimeout(function onTimeout() {
-				gr.repos.length.should.be.greaterThan(60);
+				gr.repos.length.should.equal(3);
 				gr.stop();
 				done();
 			}, 1100);
@@ -40,6 +41,7 @@ describe("github-repositories", function libSuite() {
 		});
 		it("should restart requests after the ratelimit has refreshed", function doIt(done) {
 			this.timeout(10000);
+			var nock = require('nock');
 			var gr = new GR();
 			nock("https://api.github.com")
 				.get("/repositories")
@@ -69,6 +71,7 @@ describe("github-repositories", function libSuite() {
 		});
 		it("should pause requests until the ratelimit has refreshed", function doIt(done) {
 			this.timeout(10000);
+			var nock = require('nock');
 			var gr = new GR();
 			nock("https://api.github.com")
 				.get("/repositories")

@@ -31,6 +31,14 @@ GithubRepo.prototype.get = function(url) {
 	var _this = this;
 	var _url = url;
 	log.info("getting %s", _url);
+	if( _this.token ) {
+		if( !_url.match(/\?/) ) {
+			_url = util.format("%s?access_token=%s", _url, _this.token);
+		} else {
+			_url = util.format("%s&access_token=%s", _url, _this.token);
+		}
+	}
+	log.info("updated _url %s", _url);
 	request(_url, { "headers": { "User-Agent": "github:repo:scraper" } }, function onRequest(error, response, body) {
 		var jsonBody;
 		log.info("error %j", error);
