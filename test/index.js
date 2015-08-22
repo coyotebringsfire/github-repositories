@@ -38,7 +38,7 @@ describe("github-repositories", function libSuite() {
 			gr.url.should.equal("TESTURL");
 			done();
 		});
-		describe.skip("#stop", function stopMethod() {
+		describe("#stop", function stopMethod() {
 			it("should stop requesting repositories", function doIt(done) {
 				var gr = new GR();
 				gr.start();
@@ -57,7 +57,7 @@ describe("github-repositories", function libSuite() {
 				done();
 			});
 		});
-		describe.skip("#start", function startMethod() {
+		describe("#start", function startMethod() {
 			it("should start requesting repositories", function doIt(done) {
 				var gr = new GR();
 				gr.start();
