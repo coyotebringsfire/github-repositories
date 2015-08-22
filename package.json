@@ -35,6 +35,7 @@
   "devDependencies": {
     "jshint": "^2.8.0",
     "mocha": "^2.2.5",
+    "nock": "^2.10.0",
     "should": "^7.0.4"
   },
   "dependencies": {
