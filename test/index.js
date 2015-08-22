@@ -1,4 +1,6 @@
-var should 	= require('should');
+var should 	= require('should'),
+	request = require('request'),
+	nock 	= require('nock');
 
 describe("github-repositories", function libSuite() {
 	var GR 	= require('../');
@@ -6,6 +8,24 @@ describe("github-repositories", function libSuite() {
 		GR.should.be.type('function');
 	});
 	describe("GR class", function grSuite() {
+		it.skip("should make authenticated requests if an oauth token is passed in the options argument", function doit(done) {
+			should.fail();
+			var gr = new GR({
+				token: OAUTH_TOKEN
+			});
+			nock(gr.url)
+				.get("/repositories")
+				.reply(201, '', {
+					'x-ratelimit-reset': Date.now()+1000,
+					'x-ratelimit-remaining': 0
+				});
+			gr.start();
+			setTimeout(function onTimeout() {
+				gr.repos.length.should.be.greaterThan(60);
+				gr.stop();
+				done();
+			}, 1100);
+		});
 		it("should use the default github api URL", function doIt(done) {
 			var gr = new GR();
 			gr.url.should.equal("https://api.github.com/repositories");
@@ -18,7 +38,7 @@ describe("github-repositories", function libSuite() {
 			gr.url.should.equal("TESTURL");
 			done();
 		});
-		describe("#stop", function stopMethod() {
+		describe.skip("#stop", function stopMethod() {
 			it("should stop requesting repositories", function doIt(done) {
 				var gr = new GR();
 				gr.start();
@@ -37,7 +57,7 @@ describe("github-repositories", function libSuite() {
 				done();
 			});
 		});
-		describe("#start", function startMethod() {
+		describe.skip("#start", function startMethod() {
 			it("should start requesting repositories", function doIt(done) {
 				var gr = new GR();
 				gr.start();
@@ -56,6 +76,53 @@ describe("github-repositories", function libSuite() {
 				gr.stop();
 				done();
 			});
+		});
+		it("should restart requests after the ratelimit has refreshed", function doIt(done) {
+			this.timeout(10000);
+			var gr = new GR();
+			nock("https://api.github.com")
+				.get("/repositories")
+				.once()
+				.reply(200, function(uri, requestBody) { 
+					return JSON.stringify(["test", "test", "test"]);
+				}, {
+					'x-ratelimit-reset': Date.now()+5000,
+					'x-ratelimit-remaining': 0,
+					'link': "<https://api.github.com/repositories?next=100>; test" 
+				});
+			nock("https://api.github.com")
+				.get("/repositories?next=100")
+				.once()
+				.reply(200, JSON.stringify(["test", "test", "test"]), { 
+					'x-ratelimit-reset': Date.now()+(10*60000),
+					'x-ratelimit-remaining': 0,
+					'link': "<https://api.github.com/repositories?next=200>; test" 
+				});
+			gr.start();
+			setTimeout(function onTimeout() {
+				gr.repos.length.should.be.greaterThan(3);
+				gr.stop();
+				nock.cleanAll();
+				done();
+			}, 6000);
+		});
+		it("should pause requests until the ratelimit has refreshed", function doIt(done) {
+			this.timeout(10000);
+			var gr = new GR();
+			nock("https://api.github.com")
+				.get("/repositories")
+				.once()
+				.reply(200, JSON.stringify(["test", "test", "test"]), {
+					'x-ratelimit-reset': Date.now()+1000,
+					'x-ratelimit-remaining': 0
+				});
+			gr.start();
+			setTimeout(function onTimeout() {
+				gr.repos.length.should.equal(3);
+				gr.stop();
+				nock.cleanAll();
+				done();
+			}, 900);
 		});
 	});
 });
