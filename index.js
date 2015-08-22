@@ -22,6 +22,10 @@ function GithubRepo(options) {
 	if( options && options.token ) {
 		this.token = options.token;
 	}
+	if( options && options.id && options.secret ) {
+		this.client_id = options.id;
+		this.client_secret = options.secret;
+	}
 	this.repos = [];
 }
 util.inherits(GithubRepo, EventEmitter);
@@ -36,6 +40,13 @@ GithubRepo.prototype.get = function(url) {
 			_url = util.format("%s?access_token=%s", _url, _this.token);
 		} else {
 			_url = util.format("%s&access_token=%s", _url, _this.token);
+		}
+	}
+	if( _this.client_id && _this.client_secret ) {
+		if( !_url.match(/\?/) ) {
+			_url = util.format("%s?client_id=%s&client_secret=%s", _url, _this.client_id, _this.client_secret);
+		} else {
+			_url = util.format("%s&client_id=%s&client_secret=%s", _url, _this.client_id, _this.client_secret);
 		}
 	}
 	log.info("updated _url %s", _url);

@@ -9,13 +9,31 @@ describe("github-repositories", function libSuite() {
 	});
 	describe("GR class", function grSuite() {
 		it("should make authenticated requests if an oauth token is passed in the options argument", function doit(done) {
-			//should.fail();
 			var nock = require('nock');
 			var gr = new GR({
 				token: "OAUTH_TOKEN"
 			});
 			nock("https://api.github.com")
 				.get("/repositories?access_token=OAUTH_TOKEN")
+				.reply(200, JSON.stringify([1,2,3]), {
+					'x-ratelimit-reset': Date.now()+10000,
+					'x-ratelimit-remaining': 0
+				});
+			gr.start();
+			setTimeout(function onTimeout() {
+				gr.repos.length.should.equal(3);
+				gr.stop();
+				done();
+			}, 1100);
+		});
+		it("should make authenticated requests if an id and secret are passed in options argument", function doit(done) {
+			var nock = require('nock');
+			var gr = new GR({
+				id: "TEST_ID",
+				secret: "TEST_SECRET"
+			});
+			nock("https://api.github.com")
+				.get("/repositories?client_id=TEST_ID&client_secret=TEST_SECRET")
 				.reply(200, JSON.stringify([1,2,3]), {
 					'x-ratelimit-reset': Date.now()+10000,
 					'x-ratelimit-remaining': 0
